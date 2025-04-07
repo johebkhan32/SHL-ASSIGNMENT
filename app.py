@@ -105,7 +105,6 @@
 
 
 from fastapi import FastAPI, Query
-from typing import List
 import json
 import re
 
