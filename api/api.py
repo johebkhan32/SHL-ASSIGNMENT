@@ -1,15 +1,17 @@
-import streamlit as st
 import json
 import re
 from fastapi import FastAPI, Query
 from typing import List, Dict, Any
-import uvicorn
 
 # ------------------------ Load Data ------------------------
 
 def load_data() -> List[Dict[str, Any]]:
-    with open("individual_test_solutions.json", "r", encoding="utf-8") as file:
-        return json.load(file)
+    try:
+        with open("individual_test_solutions.json", "r", encoding="utf-8") as file:
+            return json.load(file)
+    except FileNotFoundError:
+        print("Warning: Data file not found. Returning empty list.")
+        return []
 
 # Load data once at startup
 data = load_data()
@@ -69,35 +71,6 @@ def recommend(query: str, data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     sorted_results = sorted(results, key=lambda x: x.get("match_score", 0), reverse=True)
     return sorted_results[:10]
 
-# ------------------------ Streamlit UI ------------------------
-
-def main():
-    st.set_page_config(page_title="SHL Assessment Recommender", layout="wide")
-    st.title("🔍 SHL Assessment Recommender")
-    st.markdown("Paste a job description, natural language query, or SHL test URL to get relevant recommendations.")
-
-    query = st.text_area("Enter Job Description / Query / SHL Test URL", height=150)
-
-    if st.button("Get Recommendations") and query.strip():
-        with st.spinner("Analyzing query..."):
-            matches = recommend(query, data)
-
-        if matches:
-            st.subheader("Top Matching Assessments")
-            results = []
-            for match in matches:
-                results.append({
-                    "Title": match.get("title"),
-                    "Link": match.get("link"),
-                    "Duration (min)": match.get("duration", "N/A"),
-                    "Remote": "Yes" if match.get("remote_testing") else "No",
-                    "Adaptive": "Yes" if match.get("adaptive_irt") else "No",
-                    "Test Types": ", ".join(match.get("test_types", [])),
-                })
-            st.dataframe(results)
-        else:
-            st.warning("No matching assessments found.")
-
 # ------------------------ FastAPI Endpoint ------------------------
 
 app = FastAPI(
@@ -111,9 +84,6 @@ async def get_recommendations(query: str = Query(..., description="Job descripti
     matches = recommend(query, data)
     return {"results": matches}
 
-# Run Streamlit only when the file is run directly (not by FastAPI)
-if __name__ == "__main__":
-    main()
-
-
-
+@app.get("/")
+async def root():
+    return {"message": "Welcome to SHL Assessment Recommender API. Use /recommend?query=your-query to get recommendations."} 
