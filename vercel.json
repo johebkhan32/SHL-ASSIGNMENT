@@ -4,26 +4,23 @@
     "outputDirectory": ".",
     "installCommand": "pip install -r api/requirements.txt",
     "builds": [
-      { 
-        "src": "api/api.py", 
+      {
+        "src": "api/api.py",
         "use": "@vercel/python",
         "config": {
-          "maxLambdaSize": "15mb"
+          "maxLambdaSize": "15mb",
+          "runtime": "python3.9"
         }
       }
     ],
     "routes": [
+      { "src": "/docs", "dest": "api/api.py" },
+      { "src": "/openapi.json", "dest": "api/api.py" },
       { "src": "/(.*)", "dest": "api/api.py" }
     ],
-    "ignoreCommand": "git diff --quiet HEAD^ HEAD ./",
     "git": {
       "deploymentEnabled": {
         "main": true
-      }
-    }
+  }
+ }
 }
-
-
-  
-
-  
