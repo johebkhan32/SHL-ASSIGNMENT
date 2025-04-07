@@ -1,7 +1,16 @@
 {
     "version": 2,
+    "buildCommand": "pip install -r api/requirements.txt",
+    "outputDirectory": ".",
+    "installCommand": "pip install -r api/requirements.txt",
     "builds": [
-      { "src": "api/api.py", "use": "@vercel/python" }
+      { 
+        "src": "api/api.py", 
+        "use": "@vercel/python",
+        "config": {
+          "maxLambdaSize": "15mb"
+        }
+      }
     ],
     "routes": [
       { "src": "/(.*)", "dest": "api/api.py" }
@@ -13,5 +22,8 @@
       }
     }
 }
+
+
+  
 
   
